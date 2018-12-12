@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -18,27 +19,29 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+@BenchmarkMode(Mode.Throughput)
+@Measurement(batchSize = 1000, iterations = 10)
+@Warmup(batchSize = 1000, iterations = 5)
+@Fork(5)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class StringBenchmark {
 
-    private static class RunState {
-        public volatile String s1;
-        public volatile String s2;
-        public volatile String s3;
-    }
+    @State(Scope.Thread)
+    public static class RunState {
+        public String s1;
+        public String s2;
+        public String s3;
 
-    @Setup(Level.Invocation)
-    public void init() {
-        RunState.s1 = RandomStringUtils.random(10, true, true);
-        s2 = RandomStringUtils.random(10, true, true);
-        s3 = RandomStringUtils.random(10, true, true);
+        @Setup(Level.Invocation)
+        public void init() {
+            s1 = RandomStringUtils.random(10, true, true);
+            s2 = RandomStringUtils.random(10, true, true);
+            s3 = RandomStringUtils.random(10, true, true);
+        }
     }
 
     @Benchmark
-    @Warmup(iterations = 3, batchSize = 1)
-    @Measurement(iterations = 5, batchSize = 1000)
-    @BenchmarkMode(Mode.Throughput)
-    public StringBuilder stringBuilder(StringBenchmark state) {
+    public StringBuilder stringBuilder(RunState state) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(state.s1);
         stringBuilder.append(state.s2);
@@ -48,10 +51,7 @@ public class StringBenchmark {
     }
 
     @Benchmark
-    @Warmup(iterations = 3, batchSize = 1)
-    @Measurement(iterations = 5, batchSize = 1000)
-    @BenchmarkMode(Mode.Throughput)
-    public StringBuffer stringBuffer() {
+    public StringBuffer stringBuffer(RunState state) {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append(state.s1);
         stringBuffer.append(state.s2);
@@ -60,28 +60,19 @@ public class StringBenchmark {
     }
 
     @Benchmark
-    @Warmup(iterations = 3, batchSize = 1)
-    @Measurement(iterations = 5, batchSize = 1000)
-    @BenchmarkMode(Mode.Throughput)
-    public String stringPlus() {
+    public String stringPlus(RunState state) {
         String string = state.s1 + state.s2 + state.s3;
         return string;
     }
 
     @Benchmark
-    @Warmup(iterations = 3, batchSize = 1)
-    @Measurement(iterations = 5, batchSize = 1000)
-    @BenchmarkMode(Mode.Throughput)
-    public String stringConcat() {
+    public String stringConcat(RunState state) {
         String string = state.s1.concat(state.s2).concat(state.s3);
         return string;
     }
 
     @Benchmark
-    @Warmup(iterations = 3, batchSize = 1)
-    @Measurement(iterations = 5, batchSize = 1000)
-    @BenchmarkMode(Mode.Throughput)
-    public String stringFormat() {
+    public String stringFormat(RunState state) {
         String string = String.format("%s%s%s", state.s1, state.s2, state.s3);
         return string;
     }
