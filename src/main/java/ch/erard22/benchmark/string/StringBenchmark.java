@@ -20,7 +20,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 @BenchmarkMode(Mode.Throughput)
-@Measurement(batchSize = 1000, iterations = 10)
+@Measurement(batchSize = 1000, iterations = 10, time = 10)
 @Warmup(batchSize = 1000, iterations = 5)
 @Fork(5)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)

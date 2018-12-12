@@ -19,11 +19,11 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
-@BenchmarkMode(Mode.AverageTime)
-@Measurement(batchSize = 1000, iterations = 10)
+@BenchmarkMode(Mode.Throughput)
+@Measurement(batchSize = 1000, iterations = 10, time = 10)
 @Warmup(batchSize = 1000, iterations = 5)
 @Fork(5)
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class StringExtendingBenchmark {
 
     @State(Scope.Thread)
@@ -77,7 +77,7 @@ public class StringExtendingBenchmark {
         Options options = new OptionsBuilder()
                 .include(StringExtendingBenchmark.class.getSimpleName())
                 .threads(1).forks(1).shouldFailOnError(true).shouldDoGC(true)
-                .jvmArgs("-server").build();
+                .jvmArgs("-server", "-Xms4g", "-Xmx8g").build();
         new Runner(options).run();
     }
 }
